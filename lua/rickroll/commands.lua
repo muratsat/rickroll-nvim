@@ -2,12 +2,27 @@ local api = vim.api
 
 local M = {}
 
-function M.RickRoll()
-  local lines = require('rickroll.lyrics').GetLyrics()
+local frames = require('rickroll.ascii').GetFrames()
 
+local function Draw(buffer, index)
+  vim.api.nvim_buf_set_lines(buffer, 0, -1, true, {})
+
+  local frame = frames[index]
+  api.nvim_buf_set_lines(buffer, 0, -1, true, frame)
+
+  vim.defer_fn(function()
+    Draw(buffer, (index % #frames) + 1)
+  end, 50)
+end
+
+function StartAnimation(buffer)
+  Draw(buffer, 1)
+end
+
+function M.RickRoll()
   local buffer = api.nvim_create_buf(false, true)
-  api.nvim_buf_set_lines(buffer, 0, -1, true, lines)
   api.nvim_set_current_buf(buffer)
+  StartAnimation(buffer)
 end
 
 function M.setup()
